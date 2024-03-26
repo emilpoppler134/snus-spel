@@ -6,25 +6,31 @@ namespace SnusSpel
 {
     public class Program
     {
+        // Skapar en instans av Context och Repository klasserna för att hantera databasen
         private static readonly Context _context = new Context();
         private static readonly Repository _repository = new Repository(_context);
 
-        private static List<Character> characters = new();
+        // En global lista som håller alla karaktärer i spelet
+        private static List<Character> characters = new(); // Global lista med alla karaktärer
 
+        // Huvudmetoden som körs när programmet startar
         static async Task Main(string[] args)
         {
+            // Skapar databasen och lägger till fördefinierade data
             _context.Initialize();
 
+            // Hämtar karaktärer från databasen och lägger till dem i den globala listan
             List<Character> _characters = await _repository.RetrieveCharacters();
-
             for (int i = 0; i < _characters.Count; i++)
             {
                 characters.Add(_characters[i]);
                 Console.WriteLine(string.Format("{0}. {1}", i + 1, _characters[i].Name));
             }
 
+            // Variabel för spelarens valda karaktär
             Character player;
 
+            // Loop för att låta spelaren välja sin karaktär
             while (true)
             {
                 Console.Write("Välj din karaktär: ");
@@ -32,11 +38,11 @@ namespace SnusSpel
                 
                 Console.Write("\n");
 
-                if (int.TryParse(key.KeyChar.ToString(), out int choice) || choice < 1 || choice > characters.Count)
+                if (int.TryParse(key.KeyChar.ToString(), out int choice) && choice > 0 && choice <= characters.Count)
                 {
-                    Character character = characters[choice - 1];
+                    Character character = characters[choice - 1]; // Se vilken karaktär spelaren valde utifrån vilken siffra
                     player = character;
-                    characters.Remove(character);
+                    characters.Remove(character); // ta bort den valda karaktären från den globala listan
                     break;
                 }
                 else
@@ -45,6 +51,7 @@ namespace SnusSpel
                 }
             }
 
+            // Huvudloop för att hantera olika spelalternativ tills spelet avslutas
             while (true)
             {
                 Console.Write("\n");
@@ -63,8 +70,10 @@ namespace SnusSpel
                 {
                     Console.Write("\n");
 
+                    // Kör det valda alternativet i metoden nedanför
                     Status status = await RunChoice(choice, player, characters);
 
+                    //kontrollera om spelet ska avslutas
                     if (status == Status.Stop)
                     {
                         break;
@@ -77,10 +86,12 @@ namespace SnusSpel
             }
         }
 
+        // Metod för att köra det valda spel alternativet
         static async Task<Status> RunChoice(int choice, Character player, List<Character> characters)
         {
             switch (choice)
             {
+                // Alternativ 1: Visa andra spelares snusinnehav
                 case 1: {
                     for (int i = 0; i < characters.Count; i++)
                     {
@@ -95,6 +106,7 @@ namespace SnusSpel
                     }
                 } break;
 
+                // Alternativ 2: Visa spelarens snusinnehav
                 case 2: {
                     Console.WriteLine(string.Format("{0} har följande:", player.Name));
 
@@ -106,6 +118,7 @@ namespace SnusSpel
                     }
                 } break;
 
+                // Alternativ 3: Snylta en snus från en annan spelare
                 case 3: {
                     for (int i = 0; i < characters.Count; i++)
                     {
@@ -119,7 +132,7 @@ namespace SnusSpel
 
                         Console.Write("\n");
 
-                        if (int.TryParse(characterKey.KeyChar.ToString(), out int characterIndex) || characterIndex < 1 || characterIndex > characters.Count)
+                        if (int.TryParse(characterKey.KeyChar.ToString(), out int characterIndex) && characterIndex > 0 && characterIndex <= characters.Count)
                         {
                             Character character = characters[characterIndex - 1];
                             
@@ -137,9 +150,9 @@ namespace SnusSpel
                                 
                                 Console.Write("\n");
 
-                                if (int.TryParse(dosaKey.KeyChar.ToString(), out int dosaIndex) || dosaIndex < 1 || dosaIndex > characters.Count)
+                                if (int.TryParse(dosaKey.KeyChar.ToString(), out int dosaIndex) && dosaIndex > 0 && dosaIndex <= character.Inventory.Count)
                                 {
-                                    Dosa dosa = character.Inventory[dosaIndex];
+                                    Dosa dosa = character.Inventory[dosaIndex - 1];
 
                                     if (dosa.Amount > 0)
                                     {
@@ -150,8 +163,9 @@ namespace SnusSpel
                                             dosa.TakeSnus();
                                             Console.WriteLine(string.Format("Nu har {0} bara {1}st snus kvar i sin {2} dosa", character.Name, dosa.Amount, dosa.Name));
                                         }
-                                        break;
                                     }
+                                    
+                                    break;
                                 }
                                 else
                                 {
@@ -167,10 +181,12 @@ namespace SnusSpel
                     }
                 } break;
 
+                // Alternativ 4: Ge bort en snus (ej implementerad)
                 case 4: {
                     Console.WriteLine("Choice 4");
                 } break;
 
+                // Alternativ 5: Avsluta spelet
                 case 5: {
                     return Status.Stop;
                 }
