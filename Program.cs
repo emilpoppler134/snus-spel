@@ -183,7 +183,67 @@ namespace SnusSpel
 
                 // Alternativ 4: Ge bort en snus (ej implementerad)
                 case 4: {
-                    Console.WriteLine("Choice 4");
+                    // Visa tillgängliga karaktärer att ge bort till
+                    Console.WriteLine("Välj spelare att ge bort till:");
+                    for (int i = 0; i < characters.Count; i++)
+                    {
+                        Console.WriteLine($"{i + 1}. {characters[i].Name}");
+                    }
+
+                    // Vänta på spelarens val av mottagare
+                    Console.Write("Välj mottagare: ");
+                    ConsoleKeyInfo recipientKey = Console.ReadKey();
+                    Console.WriteLine();
+
+                    // Kontrollera att inmatningen är giltig och att mottagaren finns
+                    if (int.TryParse(recipientKey.KeyChar.ToString(), out int recipientIndex) && recipientIndex > 0 && recipientIndex <= characters.Count)
+                    {
+                        // Hämta mottagaren från listan
+                        Character recipient = characters[recipientIndex - 1];
+
+                        // Visa tillgängliga snusdosor att ge bort
+                        Console.WriteLine("Vilken snusdos vill du ge bort?");
+                        for (int i = 0; i < player.Inventory.Count; i++)
+                        {
+                            Console.WriteLine($"{i + 1}. {player.Inventory[i].Name} - {player.Inventory[i].Brand}");
+                        }
+
+                        // Vänta på spelarens val av snusdosan att ge bort
+                        Console.Write("Välj snusdos: ");
+                        ConsoleKeyInfo dosaKey = Console.ReadKey();
+                        Console.WriteLine();
+
+                        // Kontrollera att inmatningen är giltig och att snusdosan finns
+                        if (int.TryParse(dosaKey.KeyChar.ToString(), out int dosaIndex) && dosaIndex > 0 && dosaIndex <= player.Inventory.Count)
+                        {
+                            // Hämta snusdosan från spelarens inventering
+                            Dosa selectedDosa = player.Inventory[dosaIndex - 1];
+
+                            // Ge bort snusdosan till mottagaren
+                            recipient.Inventory.Add(selectedDosa);
+                            player.Inventory.Remove(selectedDosa);
+
+                            Console.WriteLine($"Du gav bort en {selectedDosa.Name} till {recipient.Name}.");
+
+                            // Om mottagaren är spelaren själv
+                            if (player == recipient)
+                            {
+                                Console.WriteLine($"Nu har du {player.Inventory.Count} snusdosor kvar.");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"{recipient.Name} har nu {recipient.Inventory.Count} snusdosor.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Ogiltigt val för snusdosan.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ogiltigt val för mottagaren.");
+                    }
                 } break;
 
                 // Alternativ 5: Avsluta spelet
